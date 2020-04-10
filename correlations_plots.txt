@@ -1,0 +1,27 @@
+library(corrplot)
+cross <- read.table("traits.txt", head = TRUE)
+my_data <- cross[, c(2,3,4,5,6,7,8,9,10,11)]
+M<-cor(my_data, use = "complete.obs",method = c("pearson"))
+
+cor.mtest <- function(my_data) {
+    mat <- as.matrix(my_data )
+    n <- ncol(mat)
+    p.mat<- matrix(NA, n, n)
+    diag(p.mat) <- 0
+    for (i in 1:(n - 1)) {
+        for (j in (i + 1):n) {
+            tmp <- cor.test(mat[, i], mat[, j])
+            p.mat[i, j] <- p.mat[j, i] <- tmp$p.value
+        }
+    }
+  colnames(p.mat) <- rownames(p.mat) <- colnames(mat)
+  p.mat
+}
+# matrix of the p-value of the correlation
+p.mat <- cor.mtest(my_data)
+
+col <- colorRampPalette(c("#BB4444","#EE9988","#FFFFFF","#77AADD","#4477AA"))
+pdf("WNAM.pdf",family="sans")#
+corrplot(M,method="circle",col=col(200),number.font = 4,bg = "white",title = "WNAM73",mar=c(0,0,4,4),type="full",order = "original",tl.srt=90,sig.level = 0.05,insig = "blank",diag=TRUE, tl.col = "black",tl.offset = 0.5,tl.cex= 1.3)
+dev.off()
+
